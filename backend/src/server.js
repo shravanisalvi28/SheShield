@@ -37,6 +37,9 @@ app.use('/api/alerts', alertsRouter);
 const contactsRouter = require('./routes/contacts');
 app.use('/api/contacts', contactsRouter);
 
+const guardianRouter = require('./routes/guardian');
+app.use('/api/guardian', guardianRouter);
+
 // Start server
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`SheShield API running on port ${PORT}`);
