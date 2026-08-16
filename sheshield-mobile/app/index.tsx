@@ -1,23 +1,30 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Alert } from 'react-native';
 import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
-// ...inside your component:
-const router = useRouter();
+import { Accelerometer } from 'expo-sensors';
 
-// change your button to also support long-press:
-<TouchableOpacity
-  style={styles.sosButton}
-  onPress={triggerSOS}
-  onLongPress={() => router.push('/fake-call')}
-  disabled={sending}>
-  </TouchableOpacity>
-  
 const API_URL = 'http://10.183.148.19:5000';
 
 export default function Index() {
   const [sending, setSending] = useState(false);
+  const router = useRouter();
+  useEffect(() => {
+  const SHAKE_THRESHOLD = 3.0;
+  let lastShake = 0;
 
+  const subscription = Accelerometer.addListener(({ x, y, z }) => {
+    const magnitude = Math.sqrt(x * x + y * y + z * z);
+    const now = Date.now();
+    if (magnitude > SHAKE_THRESHOLD && now - lastShake > 3000) {
+      lastShake = now;
+      triggerSOS();
+    }
+  });
+
+  Accelerometer.setUpdateInterval(200);
+  return () => subscription.remove();
+}, []);
   async function triggerSOS() {
     setSending(true);
     try {
@@ -55,7 +62,12 @@ export default function Index() {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.sosButton} onPress={triggerSOS} disabled={sending}>
+      <TouchableOpacity
+        style={styles.sosButton}
+        onPress={triggerSOS}
+        onLongPress={() => router.push('/fake-call')}
+        disabled={sending}
+      >
         <Text style={styles.sosText}>{sending ? 'Sending...' : 'SOS'}</Text>
       </TouchableOpacity>
     </View>
