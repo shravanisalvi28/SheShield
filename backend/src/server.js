@@ -34,7 +34,10 @@ app.get('/test-firestore', async (req, res) => {
 const alertsRouter = require('./routes/alerts');
 app.use('/api/alerts', alertsRouter);
 
+const contactsRouter = require('./routes/contacts');
+app.use('/api/contacts', contactsRouter);
+
 // Start server
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`SheShield API running on port ${PORT}`);
 });

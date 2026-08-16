@@ -60,6 +60,10 @@ async function findNearest(lat, lng, type) {
         },
       }
     );
+
+    // Log Google's actual status — this tells us the real reason
+    console.log(`[Maps ${type}] status: ${data.status}`, data.error_message || '');
+
     const nearest = data.results?.[0];
     return nearest
       ? { name: nearest.name, address: nearest.vicinity, location: nearest.geometry?.location }

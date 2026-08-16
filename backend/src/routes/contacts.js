@@ -9,7 +9,11 @@ router.post('/', async (req, res) => {
     if (!user_id || !name || !phone) {
       return res.status(400).json({ error: 'user_id, name, and phone are required' });
     }
-    const ref = await db.collection('contacts').add({ user_id, name, phone, email, relationship });
+    const contactData = { user_id, name, phone };
+    if (email) contactData.email = email;
+    if (relationship) contactData.relationship = relationship;
+
+    const ref = await db.collection('contacts').add(contactData);
     const snap = await ref.get();
     res.status(201).json({ id: ref.id, ...snap.data() });
   } catch (err) {
