@@ -9,11 +9,12 @@ import {
 
 import { db } from './firebase';
 import './App.css';
+import AlertMap from "./AlertMap";
 
 function App() {
   const [alerts, setAlerts] = useState([]);
   const [guardianSessions, setGuardianSessions] = useState([]);
-
+  const [selectedLocation, setSelectedLocation] = useState(null);
   useEffect(() => {
     const q = query(collection(db, 'alerts'), orderBy('created_at', 'desc'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -30,10 +31,78 @@ function App() {
     return () => unsubscribe();
   }, []);
 
+const activeAlerts = alerts.filter(
+  (alert) => alert.status === 'active'
+).length;
+
+const resolvedAlerts = alerts.filter(
+  (alert) => alert.status === 'resolved'
+).length;
+
+const totalAlerts = alerts.length;
+
+const activeGuardians = guardianSessions.length;
+
   return (
     <div style={{ fontFamily: 'sans-serif', padding: '24px', background: '#111', minHeight: '100vh', color: '#fff' }}>
-      <h1 style={{ color: '#C00000' }}>SheShield — ICCC Dashboard</h1>
-      <p>{alerts.length} alert(s) on record</p>
+      <div className="dashboard-header">
+  <div>
+    <div className="brand-row">
+      <span className="shield-icon">🛡️</span>
+      <h1>SheShield</h1>
+      <span className="dashboard-label">ICCC DASHBOARD</span>
+    </div>
+
+    <p className="dashboard-subtitle">
+      Integrated Command & Control • Real-Time Women Safety Monitoring
+    </p>
+  </div>
+
+  <div className="system-status">
+    <span className="status-dot"></span>
+    SYSTEM ONLINE
+  </div>
+</div>
+
+<div className="stats-grid">
+
+  <div className="stat-card active-card">
+    <div className="stat-icon">🚨</div>
+    <div className="stat-info">
+      <div className="stat-label">ACTIVE</div>
+      <div className="stat-number">{activeAlerts}</div>
+      <div className="stat-description">Emergencies</div>
+    </div>
+  </div>
+
+  <div className="stat-card guardian-card">
+    <div className="stat-icon">🛡️</div>
+    <div className="stat-info">
+      <div className="stat-label">GUARDIAN</div>
+      <div className="stat-number">{activeGuardians}</div>
+      <div className="stat-description">Active Sessions</div>
+    </div>
+  </div>
+
+  <div className="stat-card total-card">
+    <div className="stat-icon">📍</div>
+    <div className="stat-info">
+      <div className="stat-label">TOTAL</div>
+      <div className="stat-number">{totalAlerts}</div>
+      <div className="stat-description">Incidents</div>
+    </div>
+  </div>
+
+  <div className="stat-card resolved-card">
+    <div className="stat-icon">✓</div>
+    <div className="stat-info">
+      <div className="stat-label">RESOLVED</div>
+      <div className="stat-number">{resolvedAlerts}</div>
+      <div className="stat-description">Cases</div>
+    </div>
+  </div>
+
+</div>
 
       <div style={{ marginTop: '35px' }}>
         <h2 style={{ color: '#4CAF50' }}>🛡️ Active Guardian Sessions</h2>
@@ -51,32 +120,218 @@ function App() {
       </div>
 
       <div style={{ marginTop: '40px' }}>
-        <h2 style={{ color: '#C00000' }}>🚨 Emergency Alerts</h2>
-        <div style={{ display: 'grid', gap: '12px', marginTop: '20px' }}>
-          {alerts.map((alert) => (
-            <div
-              key={alert.id}
-              style={{
-                background: alert.status === 'active' ? '#3a1010' : '#1a1a1a',
-                border: `1px solid ${alert.status === 'active' ? '#C00000' : '#333'}`,
-                borderRadius: '8px',
-                padding: '16px',
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <strong style={{ color: alert.status === 'active' ? '#ff5555' : '#aaa' }}>
-                  {alert.status?.toUpperCase()}
-                </strong>
-                <span style={{ color: '#888', fontSize: '13px' }}>{alert.trigger_type}</span>
-              </div>
-              <p>User: {alert.user_id}</p>
-              <p>Location: {alert.latitude?.toFixed(4)}, {alert.longitude?.toFixed(4)}</p>
-              {alert.nearest_police && <p>Nearest Police: {alert.nearest_police.name}</p>}
-              {alert.nearest_hospital && <p>Nearest Hospital: {alert.nearest_hospital.name}</p>}
-            </div>
-          ))}
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '15px',
+          }}
+        >
+          <h2 style={{ color: '#C9A24B', margin: 0 }}>
+            🗺️ Live Incident Map
+          </h2>
+
+          <span
+            style={{
+              color: '#4CAF50',
+              fontSize: '13px',
+              fontWeight: 'bold',
+            }}
+          >
+            ● LIVE
+          </span>
         </div>
+
+        <AlertMap
+          alerts={alerts}
+          guardianSessions={guardianSessions}
+          selectedLocation={selectedLocation}
+        />
       </div>
+      <div className="incident-section">
+
+  <div className="section-heading">
+    <div>
+      <h2>🚨 Emergency Monitoring</h2>
+      <p>Live incidents and geographical overview</p>
+    </div>
+
+    <span className="live-badge">
+      ● LIVE
+    </span>
+  </div>
+
+  <div className="incident-layout">
+
+    {/* MAP */}
+    <div className="map-panel">
+      <div className="panel-header">
+      <div>
+      <h3>🗺️ Live Incident Map</h3>
+      <span>Real-time location monitoring</span>
+      </div>
+    <div className="map-controls">
+    <button
+      className="focus-all-button"
+      onClick={() => setSelectedLocation(null)}
+    >
+      ⛶ Focus All
+    </button>
+    <span className="map-status">
+      ● LIVE
+    </span>
+  </div>
+</div>
+      <AlertMap
+        alerts={alerts}
+        guardianSessions={guardianSessions}
+      />
+
+    </div>
+
+
+    {/* ALERT LIST */}
+    <div className="alerts-panel">
+
+      <div className="panel-header">
+        <div>
+          <h3>Emergency Alerts</h3>
+          <span>Latest incidents</span>
+        </div>
+
+        <span className="alert-count">
+          {activeAlerts} ACTIVE
+        </span>
+      </div>
+
+      <div className="alert-list">
+
+        {alerts.length === 0 ? (
+
+          <div className="empty-alerts">
+            <div>✓</div>
+            <p>No emergency alerts</p>
+            <span>System is monitoring for incidents.</span>
+          </div>
+
+        ) : (
+
+          alerts.map((alert) => (
+
+            <div
+  key={alert.id}
+  className={`alert-item ${
+    alert.status === 'active'
+      ? 'alert-active'
+      : 'alert-resolved'
+  }`}
+  onClick={() => {
+    if (
+      alert.latitude !== undefined &&
+      alert.longitude !== undefined
+    ) {
+      setSelectedLocation({
+        latitude: alert.latitude,
+        longitude: alert.longitude,
+      });
+    }
+  }}
+>
+
+              <div className="alert-top">
+
+                <div className="alert-status">
+
+                  <span
+                    className={`alert-dot ${
+                      alert.status === 'active'
+                        ? 'dot-active'
+                        : 'dot-resolved'
+                    }`}
+                  />
+
+                  <strong>
+                    {alert.status?.toUpperCase() || 'UNKNOWN'}
+                  </strong>
+
+                </div>
+
+                <span className="trigger-type">
+                  {alert.trigger_type || 'Emergency'}
+                </span>
+
+              </div>
+
+
+              <div className="alert-body">
+
+                <div className="alert-user">
+                  👤 {alert.user_id || 'Unknown User'}
+                </div>
+
+                <div className="alert-location">
+
+                  📍
+
+                  {alert.latitude !== undefined &&
+                  alert.longitude !== undefined
+                    ? `${Number(alert.latitude).toFixed(5)}, ${Number(
+                        alert.longitude
+                      ).toFixed(5)}`
+                    : 'Location unavailable'}
+
+                </div>
+
+                {alert.nearest_police && (
+                  <div className="resource-info">
+                    🚔 {alert.nearest_police.name}
+                  </div>
+                )}
+
+                {alert.nearest_hospital && (
+                  <div className="resource-info">
+                    🏥 {alert.nearest_hospital.name}
+                  </div>
+                )}
+
+              </div>
+
+
+              <button
+                className="view-map-button"
+                onClick={() => {
+
+                  if (
+                    alert.latitude !== undefined &&
+                    alert.longitude !== undefined
+                  ) {
+
+                    window.open(
+                      `https://www.google.com/maps?q=${alert.latitude},${alert.longitude}`,
+                      '_blank'
+                    );
+
+                  }
+
+                }}
+              >
+                📍 View Location
+              </button>
+
+            </div>
+
+          ))
+
+        )}
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
     </div>
   );
 }
