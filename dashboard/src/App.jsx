@@ -119,36 +119,7 @@ const activeGuardians = guardianSessions.length;
         )}
       </div>
 
-      <div style={{ marginTop: '40px' }}>
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: '15px',
-          }}
-        >
-          <h2 style={{ color: '#C9A24B', margin: 0 }}>
-            🗺️ Live Incident Map
-          </h2>
-
-          <span
-            style={{
-              color: '#4CAF50',
-              fontSize: '13px',
-              fontWeight: 'bold',
-            }}
-          >
-            ● LIVE
-          </span>
-        </div>
-
-        <AlertMap
-          alerts={alerts}
-          guardianSessions={guardianSessions}
-          selectedLocation={selectedLocation}
-        />
-      </div>
+      
       <div className="incident-section">
 
   <div className="section-heading">

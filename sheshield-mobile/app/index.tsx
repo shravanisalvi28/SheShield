@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { Accelerometer } from 'expo-sensors';
 import * as SMS from 'expo-sms';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { Platform } from 'react-native';
 
 const API_URL = 'http://10.183.148.19:5000';
 const BERRY = '#6D2E46';
@@ -18,8 +19,9 @@ export default function Index() {
   const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
   const router = useRouter();
 
-  useEffect(() => {
-    const SHAKE_THRESHOLD = 3.0;
+ useEffect(() => {
+  if (Platform.OS === 'web') return; // skip accelerometer on web
+  const SHAKE_THRESHOLD = 2.5;
     let lastShake = 0;
     const subscription = Accelerometer.addListener(({ x, y, z }) => {
       const magnitude = Math.sqrt(x * x + y * y + z * z);
