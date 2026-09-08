@@ -1,15 +1,23 @@
+/**
+ * SheShield Dashboard — Firebase Client
+ * Uses the existing sheshield-1778b project.
+ * NEVER import firebase-admin or service accounts here.
+ */
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCkeA9Rbkk_BGNAkQr-G6GnOyjHDTiNhSw",
-  authDomain: "sheshield-1778b.firebaseapp.com",
-  projectId: "sheshield-1778b",
-  storageBucket: "sheshield-1778b.firebasestorage.app",
-  messagingSenderId: "858546956058",
-  appId: "1:858546956058:web:54cbe133a22af5742baea3",
-  measurementId: "G-CC7Q9WXVCD"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
 const app = initializeApp(firebaseConfig);
+
 export const db = getFirestore(app);
+export const auth = getAuth(app);
