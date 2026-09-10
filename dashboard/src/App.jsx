@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   collection,
   query,
@@ -12,6 +13,37 @@ import { AuthProvider, useAuth } from './AuthContext';
 import LoginPage from './LoginPage';
 import './App.css';
 import AlertMap from './AlertMap';
+
+// ============================================================
+// COUNT-UP HOOK — animates displayed number when value changes
+// ============================================================
+function useCountUp(target, duration = 650) {
+  const [display, setDisplay] = useState(target);
+  const prevRef = useRef(target);
+  useEffect(() => {
+    const start = prevRef.current;
+    if (start === target) return;
+    let raf;
+    const startTime = performance.now();
+    const tick = (now) => {
+      const t = Math.min((now - startTime) / duration, 1);
+      const eased = 1 - Math.pow(1 - t, 3); // ease-out-cubic
+      setDisplay(Math.round(start + (target - start) * eased));
+      if (t < 1) raf = requestAnimationFrame(tick);
+      else prevRef.current = target;
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [target, duration]);
+  return display;
+}
+
+/** Countdown color: green → amber → red */
+function countdownColorClass(s) {
+  if (s < 60)  return 'countdown-red';
+  if (s < 300) return 'countdown-amber';
+  return 'countdown-green';
+}
 
 // ============================================================
 // AUTH GATE — wraps the whole dashboard
@@ -48,6 +80,8 @@ function Dashboard({ user, logout }) {
   const [guardianSessions, setGuardianSessions] = useState([]);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [activeCardPulse, setActiveCardPulse] = useState(false);
+  const prevActiveRef = useRef(0);
 
   useEffect(() => {
     const q = query(collection(db, 'alerts'), orderBy('created_at', 'desc'));
@@ -63,10 +97,26 @@ function Dashboard({ user, logout }) {
     });
   }, []);
 
-  const activeAlerts = alerts.filter((a) => a.status === 'active').length;
-  const resolvedAlerts = alerts.filter((a) => a.status === 'resolved').length;
-  const totalAlerts = alerts.length;
+  const activeAlerts    = alerts.filter((a) => a.status === 'active').length;
+  const resolvedAlerts  = alerts.filter((a) => a.status === 'resolved').length;
+  const totalAlerts     = alerts.length;
   const activeGuardians = guardianSessions.length;
+
+  // Count-up display values
+  const displayActive   = useCountUp(activeAlerts);
+  const displayGuardian = useCountUp(activeGuardians);
+  const displayTotal    = useCountUp(totalAlerts);
+  const displayResolved = useCountUp(resolvedAlerts);
+
+  // Pulse active card when a new alert arrives
+  useEffect(() => {
+    if (activeAlerts > prevActiveRef.current) {
+      setActiveCardPulse(true);
+      const t = setTimeout(() => setActiveCardPulse(false), 1600);
+      return () => clearTimeout(t);
+    }
+    prevActiveRef.current = activeAlerts;
+  }, [activeAlerts]);
 
   async function handleLogout() {
     if (!window.confirm('Sign out of the ICCC Dashboard?')) return;
@@ -115,48 +165,48 @@ function Dashboard({ user, logout }) {
 
       {/* ─── STATS GRID ─── */}
       <div className="stats-grid">
-        <div className="stat-card active-card">
+        <div className={`stat-card active-card${activeCardPulse ? ' pulse-new' : ''}`}>
           <div className="stat-icon">🚨</div>
           <div className="stat-info">
-            <div className="stat-label">ACTIVE</div>
-            <div className="stat-number">{activeAlerts}</div>
+            <div className="stat-label">Active Now</div>
+            <div className="stat-number">{displayActive}</div>
             <div className="stat-description">Emergencies</div>
           </div>
         </div>
         <div className="stat-card guardian-card">
           <div className="stat-icon">🛡️</div>
           <div className="stat-info">
-            <div className="stat-label">GUARDIAN</div>
-            <div className="stat-number">{activeGuardians}</div>
+            <div className="stat-label">Guardian Mode</div>
+            <div className="stat-number">{displayGuardian}</div>
             <div className="stat-description">Active Sessions</div>
           </div>
         </div>
         <div className="stat-card total-card">
-          <div className="stat-icon">📍</div>
+          <div className="stat-icon">📊</div>
           <div className="stat-info">
-            <div className="stat-label">TOTAL</div>
-            <div className="stat-number">{totalAlerts}</div>
-            <div className="stat-description">Incidents</div>
+            <div className="stat-label">Total</div>
+            <div className="stat-number">{displayTotal}</div>
+            <div className="stat-description">All Incidents</div>
           </div>
         </div>
         <div className="stat-card resolved-card">
-          <div className="stat-icon">✓</div>
+          <div className="stat-icon">✅</div>
           <div className="stat-info">
-            <div className="stat-label">RESOLVED</div>
-            <div className="stat-number">{resolvedAlerts}</div>
-            <div className="stat-description">Cases</div>
+            <div className="stat-label">Resolved</div>
+            <div className="stat-number">{displayResolved}</div>
+            <div className="stat-description">Closed Cases</div>
           </div>
         </div>
       </div>
 
       {/* ─── GUARDIAN SESSIONS ─── */}
       <div className="section-block">
-        <h2 className="section-title">🛡️ Active Guardian Sessions</h2>
+        <h2 className="section-title">🛡️ Guardian Sessions</h2>
         {guardianSessions.length === 0 ? (
           <div className="empty-state">
             <div className="empty-icon">🛡️</div>
-            <p className="empty-title">No active Guardian sessions</p>
-            <span className="empty-sub">Guardian Mode sessions will appear here in real-time.</span>
+            <p className="empty-title">No active Guardian sessions right now</p>
+            <span className="empty-sub">When a user activates Guardian Mode, their session will appear here live.</span>
           </div>
         ) : (
           <div className="guardian-grid">
@@ -171,10 +221,10 @@ function Dashboard({ user, logout }) {
       <div className="incident-section">
         <div className="section-heading">
           <div>
-            <h2>🚨 Emergency Monitoring</h2>
-            <p>Live incidents and geographical overview</p>
+            <h2>🚨 Emergency Alerts</h2>
+            <p>Live incident map and alert feed</p>
           </div>
-          <span className="live-badge">● LIVE</span>
+          <span className="live-badge">Live</span>
         </div>
 
         <div className="incident-layout">
@@ -208,61 +258,68 @@ function Dashboard({ user, logout }) {
             <div className="alert-list">
               {alerts.length === 0 ? (
                 <div className="empty-alerts">
-                  <div>✓</div>
-                  <p>No emergency alerts</p>
-                  <span>System is monitoring for incidents.</span>
+                  <div>✅</div>
+                  <p>All clear — no alerts</p>
+                  <span>The system is actively monitoring for incidents.</span>
                 </div>
               ) : (
-                alerts.map((alert) => (
-                  <div
-                    key={alert.id}
-                    className={`alert-item ${alert.status === 'active' ? 'alert-active' : 'alert-resolved'}`}
-                    onClick={() => {
-                      if (alert.latitude !== undefined && alert.longitude !== undefined) {
-                        setSelectedLocation({ latitude: alert.latitude, longitude: alert.longitude });
-                      }
-                    }}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) => e.key === 'Enter' && setSelectedLocation({ latitude: alert.latitude, longitude: alert.longitude })}
-                  >
-                    <div className="alert-top">
-                      <div className="alert-status">
-                        <span className={`alert-dot ${alert.status === 'active' ? 'dot-active' : 'dot-resolved'}`} />
-                        <strong>{alert.status?.toUpperCase() || 'UNKNOWN'}</strong>
-                      </div>
-                      <span className="trigger-type">{alert.trigger_type || 'Emergency'}</span>
-                    </div>
-
-                    <div className="alert-body">
-                      <div className="alert-user">👤 {alert.user_id || 'Unknown User'}</div>
-                      <div className="alert-location">
-                        📍{' '}
-                        {alert.latitude !== undefined && alert.longitude !== undefined
-                          ? `${Number(alert.latitude).toFixed(5)}, ${Number(alert.longitude).toFixed(5)}`
-                          : 'Location unavailable'}
-                      </div>
-                      {alert.nearest_police && (
-                        <div className="resource-info">🚔 {alert.nearest_police.name}</div>
-                      )}
-                      {alert.nearest_hospital && (
-                        <div className="resource-info">🏥 {alert.nearest_hospital.name}</div>
-                      )}
-                    </div>
-
-                    <button
-                      className="view-map-button"
-                      onClick={(e) => {
-                        e.stopPropagation();
+                <AnimatePresence initial={false}>
+                  {alerts.map((alert) => (
+                    <motion.div
+                      key={alert.id}
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, x: -24, height: 0, marginBottom: 0, padding: 0 }}
+                      transition={{ duration: 0.22, ease: 'easeOut' }}
+                      layout
+                      className={`alert-item ${alert.status === 'active' ? 'alert-active' : 'alert-resolved'}`}
+                      onClick={() => {
                         if (alert.latitude !== undefined && alert.longitude !== undefined) {
-                          window.open(`https://www.google.com/maps?q=${alert.latitude},${alert.longitude}`, '_blank');
+                          setSelectedLocation({ latitude: alert.latitude, longitude: alert.longitude });
                         }
                       }}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => e.key === 'Enter' && setSelectedLocation({ latitude: alert.latitude, longitude: alert.longitude })}
                     >
-                      📍 View on Google Maps
-                    </button>
-                  </div>
-                ))
+                      <div className="alert-top">
+                        <div className="alert-status">
+                          <span className={`alert-dot ${alert.status === 'active' ? 'dot-active' : 'dot-resolved'}`} />
+                          <strong>{alert.status?.toUpperCase() || 'UNKNOWN'}</strong>
+                        </div>
+                        <span className="trigger-type">{alert.trigger_type || 'Emergency'}</span>
+                      </div>
+
+                      <div className="alert-body">
+                        <div className="alert-user">👤 {alert.user_id || 'Unknown User'}</div>
+                        <div className="alert-location">
+                          📍{' '}
+                          {alert.latitude !== undefined && alert.longitude !== undefined
+                            ? `${Number(alert.latitude).toFixed(5)}, ${Number(alert.longitude).toFixed(5)}`
+                            : 'Location unavailable'}
+                        </div>
+                        {alert.nearest_police && (
+                          <div className="resource-info">🚔 {alert.nearest_police.name}</div>
+                        )}
+                        {alert.nearest_hospital && (
+                          <div className="resource-info">🏥 {alert.nearest_hospital.name}</div>
+                        )}
+                      </div>
+
+                      <button
+                        className="view-map-button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (alert.latitude !== undefined && alert.longitude !== undefined) {
+                            window.open(`https://www.google.com/maps?q=${alert.latitude},${alert.longitude}`, '_blank');
+                          }
+                        }}
+                      >
+                        📍 View on Google Maps
+                      </button>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
               )}
             </div>
           </div>
@@ -288,7 +345,7 @@ function GuardianCard({ session }) {
   const minutes = Math.floor(remainingSeconds / 60);
   const seconds = remainingSeconds % 60;
   const formattedTime = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-  const isLow = remainingSeconds < 300;
+  const cdClass = countdownColorClass(remainingSeconds);
 
   return (
     <div className="guardian-card-item">
@@ -309,7 +366,7 @@ function GuardianCard({ session }) {
       </div>
       <div className="guardian-timer-box">
         <div className="guardian-timer-label">TIME REMAINING</div>
-        <div className={`guardian-timer ${isLow ? 'guardian-timer-low' : ''}`}>{formattedTime}</div>
+        <div className={`guardian-timer ${cdClass}`}>{formattedTime}</div>
       </div>
       <button
         className="guardian-map-btn"

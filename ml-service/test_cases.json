@@ -1,0 +1,212 @@
+[
+  {
+    "id": 1,
+    "text": "Help me please, I need someone to help me right now!",
+    "expected": true,
+    "group": "keyword-english",
+    "note": "Direct keyword hit: help me, please help, i need help. Baseline true-positive."
+  },
+  {
+    "id": 2,
+    "text": "I'm being attacked! Someone is attacking me right now!",
+    "expected": true,
+    "group": "keyword-english",
+    "note": "Direct keyword hit: i'm being attacked, someone is attacking me. Category: assault, severity: critical."
+  },
+  {
+    "id": 3,
+    "text": "Someone is following me and I can't shake them off.",
+    "expected": true,
+    "group": "keyword-english",
+    "note": "Direct keyword hit: someone is following me. Category: following, severity: high."
+  },
+  {
+    "id": 4,
+    "text": "There is real danger here, I don't feel safe at all.",
+    "expected": true,
+    "group": "keyword-english",
+    "note": "Keyword hits: danger, i don't feel safe. Multi-phrase match, should boost confidence."
+  },
+  {
+    "id": 5,
+    "text": "I'm being kidnapped, this man is forcing me into a car!",
+    "expected": true,
+    "group": "keyword-high-severity",
+    "note": "Direct keyword hit: i'm being kidnapped. Category: kidnapping, severity: critical."
+  },
+  {
+    "id": 6,
+    "text": "SOS emergency, call the police now!",
+    "expected": true,
+    "group": "keyword-high-severity",
+    "note": "Keyword hits: sos, emergency, call police. Multiple critical-category matches."
+  },
+  {
+    "id": 7,
+    "text": "Bachao! Koi mujhe maar raha hai!",
+    "expected": true,
+    "group": "keyword-hindi",
+    "note": "Hindi keyword hits: bachao, koi mujhe maar raha hai. Tests multilingual emergency + assault coverage."
+  },
+  {
+    "id": 8,
+    "text": "Mala madat kara, konitari vachva!",
+    "expected": true,
+    "group": "keyword-marathi",
+    "note": "Marathi keyword hits: mala madat kara, konitari vachva. Tests Marathi emergency keyword coverage."
+  },
+  {
+    "id": 9,
+    "text": "Koi mera picha kar raha hai, mujhe dar lag raha hai.",
+    "expected": true,
+    "group": "keyword-hindi",
+    "note": "Hindi keyword hits: koi mera picha kar raha hai, mujhe dar lag raha hai. Multi-phrase match."
+  },
+  {
+    "id": 10,
+    "text": "A man has grabbed my arm and won't let me leave this room.",
+    "expected": true,
+    "group": "model-only",
+    "note": "NO keyword match expected. Describes physical restraint - relies on DistilRoBERTa detecting fear/anger. Tests whether ML layer adds real value."
+  },
+  {
+    "id": 11,
+    "text": "He took my phone, locked the door, and said I'm not going anywhere tonight.",
+    "expected": true,
+    "group": "model-only",
+    "note": "NO keyword match expected. Coercive control scenario with no explicit distress words - pure ML model test."
+  },
+  {
+    "id": 12,
+    "text": "I think something terrible is about to happen to me and there's no way out.",
+    "expected": true,
+    "group": "model-only",
+    "note": "NO keyword match expected. Expresses hopelessness and imminent threat indirectly."
+  },
+  {
+    "id": 13,
+    "text": "Please, I don't want to be here, I'm begging you, let me go.",
+    "expected": true,
+    "group": "model-only",
+    "note": "NO keyword match expected. Pleading/desperation tone. Should trigger fear/sadness signal in the emotion model."
+  },
+  {
+    "id": 14,
+    "text": "They're hurting me and nobody is coming to stop them.",
+    "expected": true,
+    "group": "model-only",
+    "note": "NO keyword match expected. Active harm described without exact keyword phrases."
+  },
+  {
+    "id": 15,
+    "text": "I'm being threatened at gunpoint, I am in danger right now.",
+    "expected": true,
+    "group": "keyword-english",
+    "note": "Keyword hits: i'm being threatened, i am in danger. Category: threat, severity: high."
+  },
+  {
+    "id": 16,
+    "text": "Can you help me find a good recipe for pasta carbonara?",
+    "expected": false,
+    "group": "trap-keyword-fp",
+    "note": "DELIBERATE TRAP: contains help me out of context. Keyword engine WILL flag this. Known limitation: substring keyword matching causes false positives on benign help requests."
+  },
+  {
+    "id": 17,
+    "text": "I'm so scared of spiders, I found one in my bathroom this morning.",
+    "expected": false,
+    "group": "trap-keyword-fp",
+    "note": "DELIBERATE TRAP: contains i'm scared out of context. Keyword engine WILL flag category:fear. Known limitation: fear keyword fires on phobias and mundane fears."
+  },
+  {
+    "id": 18,
+    "text": "There's real danger in eating too much processed sugar every day.",
+    "expected": false,
+    "group": "trap-keyword-fp",
+    "note": "DELIBERATE TRAP: contains danger out of context (health advice). Known limitation: single-word danger is too broad."
+  },
+  {
+    "id": 19,
+    "text": "I'm in trouble finishing this homework assignment before the deadline.",
+    "expected": false,
+    "group": "trap-keyword-fp",
+    "note": "DELIBERATE TRAP: contains i'm in trouble out of context. Known limitation: idiomatic in trouble triggers distress flag."
+  },
+  {
+    "id": 20,
+    "text": "Can you help me move the sofa to the other side of the room?",
+    "expected": false,
+    "group": "trap-keyword-fp",
+    "note": "DELIBERATE TRAP: contains help me out of context (chore request). Duplicate FP pattern to show frequency of this limitation."
+  },
+  {
+    "id": 21,
+    "text": "I'll meet you at the coffee shop at 3 PM tomorrow, okay?",
+    "expected": false,
+    "group": "neutral",
+    "note": "Plain scheduling sentence. No distress cues."
+  },
+  {
+    "id": 22,
+    "text": "It looks like it will rain this afternoon, you should carry an umbrella.",
+    "expected": false,
+    "group": "neutral",
+    "note": "Weather small-talk. Zero distress signal expected."
+  },
+  {
+    "id": 23,
+    "text": "I need to pick up some groceries - milk, eggs, and bread.",
+    "expected": false,
+    "group": "neutral",
+    "note": "Daily errand sentence. No keyword hits, no negative emotion expected."
+  },
+  {
+    "id": 24,
+    "text": "The project deadline is next Friday so let's schedule a review on Thursday.",
+    "expected": false,
+    "group": "neutral",
+    "note": "Professional/work scheduling. Neutral tone throughout."
+  },
+  {
+    "id": 25,
+    "text": "My train arrives at 6, can you pick me up from the station?",
+    "expected": false,
+    "group": "neutral",
+    "note": "Logistics request. No distress language or emotional signal."
+  },
+  {
+    "id": 26,
+    "text": "I just got the job offer! I'm so happy and excited about this new chapter!",
+    "expected": false,
+    "group": "positive-emotion",
+    "note": "Strong positive emotion. False-positive control: model should classify joy/surprise, NOT fear/anger/sadness."
+  },
+  {
+    "id": 27,
+    "text": "We won the match! This is the best day of my life, I can't believe it!",
+    "expected": false,
+    "group": "positive-emotion",
+    "note": "Excitement and joy. False-positive control - ensemble should return distress_detected=false."
+  },
+  {
+    "id": 28,
+    "text": "I'm thrilled about the birthday party tonight, everyone I love will be there.",
+    "expected": false,
+    "group": "positive-emotion",
+    "note": "Warm, happy anticipation. No negative emotion signal expected."
+  },
+  {
+    "id": 29,
+    "text": "The sunset over the mountains was absolutely breathtaking this evening.",
+    "expected": false,
+    "group": "neutral",
+    "note": "Aesthetic/descriptive sentence. No distress, positive-neutral tone. Easy true-negative."
+  },
+  {
+    "id": 30,
+    "text": "I don't understand this math problem, can someone explain it to me?",
+    "expected": false,
+    "group": "neutral",
+    "note": "Academic confusion. No distress expected from keyword or model layer."
+  }
+]

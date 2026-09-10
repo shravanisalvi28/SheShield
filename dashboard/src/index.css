@@ -1,52 +1,57 @@
 /* ============================================================
-   SheShield Design System — CSS Variables
-   Base design tokens for the ICCC Dashboard
+   SheShield Design System — CSS Variables & Base (Light Theme)
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap');
 
 :root {
   /* Brand Colors */
-  --color-berry: #6D2E46;
-  --color-berry-dark: #4A1E30;
-  --color-berry-light: #8A3A59;
-  --color-gold: #C9A24B;
-  --color-gold-light: #D4B366;
+  --color-berry: #7C3355;
+  --color-berry-dark: #5A1F3A;
+  --color-berry-light: #9B4470;
+  --color-berry-glow: rgba(124,51,85,0.18);
+  --color-berry-subtle: rgba(124,51,85,0.08);
+  --color-gold: #B8892A;
+  --color-gold-light: #D4A843;
 
   /* Emergency */
-  --color-emergency: #C00000;
-  --color-emergency-light: #FF4444;
-  --color-emergency-bg: #1A0000;
-  --color-emergency-border: #4A0000;
+  --color-emergency: #C62828;
+  --color-emergency-light: #E53935;
+  --color-emergency-bg: rgba(198,40,40,0.08);
+  --color-emergency-border: rgba(198,40,40,0.25);
 
   /* Guardian / Success */
   --color-guardian: #2E7D32;
-  --color-guardian-light: #4CAF50;
-  --color-guardian-bg: #0A1F0C;
-  --color-guardian-border: #1B5E20;
+  --color-guardian-light: #388E3C;
+  --color-guardian-bg: rgba(46,125,50,0.08);
+  --color-guardian-border: rgba(46,125,50,0.25);
 
-  /* Backgrounds */
-  --color-bg: #0F0F0F;
-  --color-surface: #1A1A1A;
-  --color-surface-elevated: #222222;
-  --color-surface-high: #2A2A2A;
+  /* Warning */
+  --color-warning: #E65100;
+  --color-warning-bg: rgba(230,81,0,0.08);
+
+  /* Backgrounds — LIGHT */
+  --color-bg: #F5F5F8;
+  --color-surface: #FFFFFF;
+  --color-surface-elevated: #F0F0F6;
+  --color-surface-high: #E8E8F0;
 
   /* Borders */
-  --color-border: #2D2D2D;
-  --color-border-light: #3D3D3D;
-  --color-border-focus: #6D2E46;
+  --color-border: rgba(0,0,0,0.07);
+  --color-border-light: rgba(0,0,0,0.12);
+  --color-border-focus: #7C3355;
 
   /* Text */
-  --color-text-primary: #FFFFFF;
-  --color-text-secondary: #AAAAAA;
-  --color-text-muted: #666666;
+  --color-text-primary: #1A1A2E;
+  --color-text-secondary: #55556A;
+  --color-text-muted: #9999AA;
 
   /* Radius */
   --radius-sm: 6px;
   --radius-md: 10px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
-  --radius-xxl: 24px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-xxl: 28px;
   --radius-full: 9999px;
 
   /* Spacing */
@@ -57,9 +62,10 @@
   --space-lg: 20px;
   --space-xl: 24px;
   --space-xxl: 32px;
+  --space-xxxl: 48px;
 
   /* Typography */
-  --font-sans: 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: 'Nunito', system-ui, 'Segoe UI', Roboto, sans-serif;
 
   font-family: var(--font-sans);
   font-size: 15px;
@@ -67,7 +73,7 @@
   letter-spacing: 0.1px;
   color: var(--color-text-primary);
   background: var(--color-bg);
-  color-scheme: dark;
+  color-scheme: light;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -77,11 +83,15 @@
 /* Reset */
 *, *::before, *::after { box-sizing: border-box; }
 
-body { margin: 0; background: var(--color-bg); }
+body {
+  margin: 0;
+  background: var(--color-bg);
+  min-height: 100svh;
+}
 
 #root {
   width: 100%;
-  max-width: 1400px;
+  max-width: 1440px;
   margin: 0 auto;
   min-height: 100svh;
   display: flex;
@@ -105,4 +115,19 @@ button {
 
 input {
   font-family: var(--font-sans);
+}
+
+/* Animations */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }

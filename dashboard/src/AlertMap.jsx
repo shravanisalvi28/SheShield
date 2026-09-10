@@ -125,6 +125,50 @@ export default function AlertMap({
       : defaultCenter;
 
 
+  // ── Custom brand-colored markers ──────────────────────────────
+  const emergencyIcon = L.divIcon({
+    html: `<div style="
+      width:34px;height:34px;border-radius:50%;
+      background:#6D2E46;border:3px solid #fff;
+      display:flex;align-items:center;justify-content:center;
+      box-shadow:0 3px 10px rgba(109,46,70,0.55);
+      font-size:15px;line-height:1;
+    ">🚨</div>`,
+    className: '',
+    iconSize: [34, 34],
+    iconAnchor: [17, 17],
+    popupAnchor: [0, -18],
+  });
+
+  const activeEmergencyIcon = L.divIcon({
+    html: `<div style="
+      width:38px;height:38px;border-radius:50%;
+      background:#C00000;border:3px solid #fff;
+      display:flex;align-items:center;justify-content:center;
+      box-shadow:0 3px 14px rgba(192,0,0,0.6);
+      font-size:16px;line-height:1;
+      animation:none;
+    ">🚨</div>`,
+    className: '',
+    iconSize: [38, 38],
+    iconAnchor: [19, 19],
+    popupAnchor: [0, -20],
+  });
+
+  const guardianIcon = L.divIcon({
+    html: `<div style="
+      width:34px;height:34px;border-radius:50%;
+      background:#2E7D32;border:3px solid #fff;
+      display:flex;align-items:center;justify-content:center;
+      box-shadow:0 3px 10px rgba(46,125,50,0.5);
+      font-size:15px;line-height:1;
+    ">🛡️</div>`,
+    className: '',
+    iconSize: [34, 34],
+    iconAnchor: [17, 17],
+    popupAnchor: [0, -18],
+  });
+
   return (
     <div className="map-container">
 
@@ -139,8 +183,10 @@ export default function AlertMap({
       >
 
         <TileLayer
-          attribution="&copy; OpenStreetMap contributors"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          className="map-tiles-light"
+          maxZoom={19}
         />
 
 
@@ -161,13 +207,11 @@ export default function AlertMap({
             Number(alert.longitude),
           ];
 
-          const active = alert.status === "active";
-
+          const active = alert.status === 'active';
 
           return (
             <div key={`alert-${alert.id}`}>
-
-              <Marker position={position}>
+              <Marker position={position} icon={active ? activeEmergencyIcon : emergencyIcon}>
 
                 <Popup>
 
@@ -264,8 +308,7 @@ export default function AlertMap({
 
           return (
             <div key={`guardian-${session.id}`}>
-
-              <Marker position={position}>
+              <Marker position={position} icon={guardianIcon}>
 
                 <Popup>
 

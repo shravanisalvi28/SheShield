@@ -1,58 +1,61 @@
 /**
- * SheShield Design System Tokens (Mobile)
- * Shared across all screens for visual consistency.
+ * SheShield Design System Tokens (Mobile — Light Theme)
  */
 
 export const Colors = {
   // Brand
-  berry: '#6D2E46',
-  berryDark: '#4A1E30',
-  berryLight: '#8A3A59',
-  gold: '#C9A24B',
-  goldLight: '#D4B366',
+  berry: '#7C3355',
+  berryDark: '#5A1F3A',
+  berryLight: '#9B4470',
+  berryGlow: 'rgba(124,51,85,0.18)',
+  berrySubtle: 'rgba(124,51,85,0.08)',
+
+  // Gold
+  gold: '#B8892A',
+  goldLight: '#D4A843',
 
   // Emergency
-  emergency: '#C00000',
+  emergency: '#C62828',
   emergencyDark: '#8B0000',
-  emergencyLight: '#FF4444',
-  emergencyBg: '#1A0000',
-  emergencyBorder: '#4A0000',
+  emergencyLight: '#E53935',
+  emergencyBg: 'rgba(198,40,40,0.08)',
+  emergencyBorder: 'rgba(198,40,40,0.25)',
 
   // Guardian / Success
   guardian: '#2E7D32',
-  guardianLight: '#4CAF50',
-  guardianBg: '#0A1F0C',
-  guardianBorder: '#1B5E20',
+  guardianLight: '#388E3C',
+  guardianBg: 'rgba(46,125,50,0.08)',
+  guardianBorder: 'rgba(46,125,50,0.25)',
 
   // Warning
-  warning: '#F59E0B',
-  warningBg: '#1C1400',
+  warning: '#E65100',
+  warningBg: 'rgba(230,81,0,0.08)',
 
-  // Neutral backgrounds
-  bg: '#0F0F0F',
-  surface: '#1A1A1A',
-  surfaceElevated: '#222222',
-  surfaceHigh: '#2A2A2A',
+  // Backgrounds — LIGHT
+  bg: '#F5F5F8',
+  surface: '#FFFFFF',
+  surfaceElevated: '#F0F0F6',
+  surfaceHigh: '#E8E8F0',
 
   // Borders
-  border: '#2D2D2D',
-  borderLight: '#3D3D3D',
-  borderFocus: '#6D2E46',
+  border: 'rgba(0,0,0,0.07)',
+  borderLight: 'rgba(0,0,0,0.12)',
+  borderFocus: '#7C3355',
 
   // Text
-  textPrimary: '#FFFFFF',
-  textSecondary: '#AAAAAA',
-  textMuted: '#666666',
+  textPrimary: '#1A1A2E',
+  textSecondary: '#55556A',
+  textMuted: '#9999AA',
   textInverse: '#FFFFFF',
 
   // Status
-  online: '#4CAF50',
-  offline: '#666666',
-  error: '#FF4444',
+  online: '#2E7D32',
+  offline: '#9999AA',
+  error: '#C62828',
 
   // Overlays
-  overlay: 'rgba(0,0,0,0.6)',
-  shimmer: 'rgba(255,255,255,0.05)',
+  overlay: 'rgba(0,0,0,0.4)',
+  shimmer: 'rgba(0,0,0,0.03)',
 };
 
 export const Typography = {
@@ -63,12 +66,13 @@ export const Typography = {
   lg: 20,
   xl: 24,
   xxl: 30,
-  xxxl: 40,
+  xxxl: 42,
   regular: '400' as const,
   medium: '500' as const,
   semibold: '600' as const,
   bold: '700' as const,
   extrabold: '800' as const,
+  black: '900' as const,
 };
 
 export const Spacing = {
@@ -85,39 +89,53 @@ export const Spacing = {
 export const Radius = {
   sm: 6,
   md: 10,
-  lg: 12,
-  xl: 16,
-  xxl: 24,
+  lg: 14,
+  xl: 18,
+  xxl: 28,
   full: 9999,
 };
 
 export const Shadows = {
   sm: {
     shadowColor: '#000',
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.06,
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
     elevation: 2,
   },
   md: {
     shadowColor: '#000',
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
     shadowOffset: { width: 0, height: 4 },
     elevation: 4,
   },
-  emergency: {
-    shadowColor: '#C00000',
-    shadowOpacity: 0.5,
+  lg: {
+    shadowColor: '#000',
+    shadowOpacity: 0.12,
     shadowRadius: 20,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 8,
+  },
+  emergency: {
+    shadowColor: '#C62828',
+    shadowOpacity: 0.45,
+    shadowRadius: 24,
     shadowOffset: { width: 0, height: 0 },
-    elevation: 12,
+    elevation: 14,
   },
   berry: {
-    shadowColor: '#6D2E46',
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
+    shadowColor: '#7C3355',
+    shadowOpacity: 0.3,
+    shadowRadius: 14,
     shadowOffset: { width: 0, height: 4 },
     elevation: 8,
+  },
+  guardian: {
+    shadowColor: '#2E7D32',
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 6,
   },
 };

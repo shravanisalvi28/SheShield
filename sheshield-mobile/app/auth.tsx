@@ -89,25 +89,39 @@ export default function AuthScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle='light-content' backgroundColor={Colors.berry} />
+      <StatusBar barStyle='dark-content' backgroundColor={Colors.bg} />
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-        <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps='handled' showsVerticalScrollIndicator={false}>
-
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          keyboardShouldPersistTaps='handled'
+          showsVerticalScrollIndicator={false}
+        >
+          {/* ── Brand header ── */}
           <View style={styles.header}>
-            <View style={styles.logoRow}>
-              <Ionicons name='shield-checkmark' size={38} color={Colors.gold} />
-              <Text style={styles.logoText}>SheShield</Text>
+            <View style={styles.shieldWrap}>
+              <Ionicons name='shield-checkmark' size={42} color={Colors.berry} />
             </View>
-            <Text style={styles.tagline}>Women Safety and Emergency Response</Text>
+            <Text style={styles.logoText}>SheShield</Text>
+            <Text style={styles.tagline}>Women Safety & Emergency Response</Text>
           </View>
 
+          {/* ── Card ── */}
           <View style={styles.card}>
+
             {mode !== 'reset' && (
               <View style={styles.tabs}>
-                <TouchableOpacity style={[styles.tab, mode === 'login' && styles.tabActive]} onPress={() => switchMode('login')}>
+                <TouchableOpacity
+                  style={[styles.tab, mode === 'login' && styles.tabActive]}
+                  onPress={() => switchMode('login')}
+                  accessibilityRole='tab'
+                >
                   <Text style={[styles.tabText, mode === 'login' && styles.tabTextActive]}>Sign In</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={[styles.tab, mode === 'signup' && styles.tabActive]} onPress={() => switchMode('signup')}>
+                <TouchableOpacity
+                  style={[styles.tab, mode === 'signup' && styles.tabActive]}
+                  onPress={() => switchMode('signup')}
+                  accessibilityRole='tab'
+                >
                   <Text style={[styles.tabText, mode === 'signup' && styles.tabTextActive]}>Sign Up</Text>
                 </TouchableOpacity>
               </View>
@@ -121,32 +135,37 @@ export default function AuthScreen() {
             )}
 
             <Text style={styles.cardTitle}>
-              {mode === 'login' ? 'Welcome back' : mode === 'signup' ? 'Create account' : 'Reset Password'}
+              {mode === 'login' ? 'Welcome back 👋' : mode === 'signup' ? 'Create account' : 'Reset Password'}
             </Text>
             <Text style={styles.cardSubtitle}>
-              {mode === 'login' ? 'Sign in to access the SheShield app' : mode === 'signup' ? 'Join SheShield to stay safe' : 'Enter your email to receive a reset link'}
+              {mode === 'login'
+                ? 'Sign in to access SheShield'
+                : mode === 'signup'
+                  ? 'Join SheShield to stay protected'
+                  : 'Enter your email to receive a reset link'}
             </Text>
 
             {error && (
               <View style={styles.errorBox}>
-                <Ionicons name='alert-circle' size={16} color={Colors.emergencyLight} />
+                <Ionicons name='alert-circle' size={16} color={Colors.emergency} />
                 <Text style={styles.errorText}>{error}</Text>
               </View>
             )}
             {success && (
               <View style={styles.successBox}>
-                <Ionicons name='checkmark-circle' size={16} color={Colors.guardianLight} />
+                <Ionicons name='checkmark-circle' size={16} color={Colors.guardian} />
                 <Text style={styles.successText}>{success}</Text>
               </View>
             )}
 
+            {/* Email */}
             <View style={styles.fieldGroup}>
-              <Text style={styles.label}>Email</Text>
+              <Text style={styles.label}>Email address</Text>
               <View style={styles.inputRow}>
                 <Ionicons name='mail-outline' size={18} color={Colors.textMuted} style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
-                  placeholder='your@email.com'
+                  placeholder='you@email.com'
                   placeholderTextColor={Colors.textMuted}
                   value={email}
                   onChangeText={setEmail}
@@ -159,6 +178,7 @@ export default function AuthScreen() {
               </View>
             </View>
 
+            {/* Password */}
             {mode !== 'reset' && (
               <View style={styles.fieldGroup}>
                 <Text style={styles.label}>Password</Text>
@@ -182,14 +202,15 @@ export default function AuthScreen() {
               </View>
             )}
 
+            {/* Confirm Password */}
             {mode === 'signup' && (
               <View style={styles.fieldGroup}>
-                <Text style={styles.label}>Confirm Password</Text>
+                <Text style={styles.label}>Confirm password</Text>
                 <View style={styles.inputRow}>
                   <Ionicons name='lock-closed-outline' size={18} color={Colors.textMuted} style={styles.inputIcon} />
                   <TextInput
                     style={styles.input}
-                    placeholder='Repeat password'
+                    placeholder='Repeat your password'
                     placeholderTextColor={Colors.textMuted}
                     value={confirmPassword}
                     onChangeText={setConfirmPassword}
@@ -216,12 +237,12 @@ export default function AuthScreen() {
               {loading
                 ? <ActivityIndicator color='#fff' size='small' />
                 : <Text style={styles.submitText}>
-                    {mode === 'login' ? 'Sign In' : mode === 'signup' ? 'Create Account' : 'Send Reset Email'}
-                  </Text>}
+                  {mode === 'login' ? 'Sign In' : mode === 'signup' ? 'Create Account' : 'Send Reset Email'}
+                </Text>}
             </TouchableOpacity>
           </View>
 
-          <Text style={styles.footer}>Your safety is our priority. SheShield keeps your data secure.</Text>
+          <Text style={styles.footer}>🔒 Your data is secure and private</Text>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -230,37 +251,160 @@ export default function AuthScreen() {
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  safe: { flex: 1, backgroundColor: Colors.berry },
-  scroll: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: Spacing.base, paddingVertical: Spacing.xxl },
-  header: { alignItems: 'center', marginBottom: Spacing.xl },
-  logoRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: Spacing.sm },
-  logoText: { fontSize: 32, fontWeight: '800', color: '#fff', letterSpacing: 0.5 },
-  tagline: { color: 'rgba(255,255,255,0.7)', fontSize: Typography.sm, textAlign: 'center' },
-  card: { backgroundColor: Colors.surface, borderRadius: Radius.xl, padding: Spacing.xl, ...Shadows.md },
-  tabs: { flexDirection: 'row', backgroundColor: Colors.bg, borderRadius: Radius.md, padding: 4, marginBottom: Spacing.lg },
-  tab: { flex: 1, paddingVertical: 10, alignItems: 'center', borderRadius: Radius.md - 2 },
-  tabActive: { backgroundColor: Colors.berry },
-  tabText: { fontSize: Typography.base, fontWeight: Typography.medium, color: Colors.textMuted },
-  tabTextActive: { color: '#fff', fontWeight: Typography.semibold },
+  safe: { flex: 1, backgroundColor: Colors.bg },
+  scroll: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingHorizontal: Spacing.base,
+    paddingVertical: Spacing.xxl,
+  },
+
+  // Header
+  header: {
+    alignItems: 'center',
+    marginBottom: Spacing.xl,
+    paddingVertical: Spacing.base,
+  },
+  shieldWrap: {
+    width: 76,
+    height: 76,
+    borderRadius: 38,
+    backgroundColor: Colors.berrySubtle,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.md,
+    borderWidth: 1.5,
+    borderColor: 'rgba(124,51,85,0.2)',
+    ...Shadows.md,
+  },
+  logoText: {
+    fontSize: 32,
+    fontWeight: Typography.black,
+    color: Colors.berryDark,
+    letterSpacing: -0.5,
+    marginBottom: Spacing.sm,
+  },
+  tagline: {
+    color: Colors.textMuted,
+    fontSize: Typography.sm,
+    textAlign: 'center',
+  },
+
+  // Card
+  card: {
+    backgroundColor: Colors.surface,
+    borderRadius: Radius.xl,
+    padding: Spacing.xl,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    ...Shadows.lg,
+  },
+
+  // Tabs
+  tabs: {
+    flexDirection: 'row',
+    backgroundColor: Colors.bg,
+    borderRadius: Radius.full,
+    padding: 4,
+    marginBottom: Spacing.xl,
+    gap: 4,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 10,
+    alignItems: 'center',
+    borderRadius: Radius.full,
+  },
+  tabActive: {
+    backgroundColor: Colors.berry,
+    ...Shadows.berry,
+  },
+  tabText: { fontSize: Typography.base, fontWeight: Typography.bold, color: Colors.textMuted },
+  tabTextActive: { color: '#fff' },
+
+  // Back
   backRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: Spacing.base },
-  backText: { color: Colors.textSecondary, fontSize: Typography.sm },
-  cardTitle: { fontSize: Typography.xl, fontWeight: Typography.bold, color: Colors.textPrimary, marginBottom: 4 },
-  cardSubtitle: { fontSize: Typography.sm, color: Colors.textSecondary, marginBottom: Spacing.lg },
-  errorBox: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: Colors.emergencyBg, borderWidth: 1, borderColor: Colors.emergencyBorder, borderRadius: Radius.md, padding: Spacing.md, marginBottom: Spacing.base },
-  errorText: { flex: 1, color: Colors.emergencyLight, fontSize: Typography.sm },
-  successBox: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: Colors.guardianBg, borderWidth: 1, borderColor: Colors.guardianBorder, borderRadius: Radius.md, padding: Spacing.md, marginBottom: Spacing.base },
-  successText: { flex: 1, color: Colors.guardianLight, fontSize: Typography.sm },
+  backText: { color: Colors.textSecondary, fontSize: Typography.sm, fontWeight: Typography.semibold },
+
+  // Titles
+  cardTitle: {
+    fontSize: Typography.xl,
+    fontWeight: Typography.extrabold,
+    color: Colors.textPrimary,
+    marginBottom: 4,
+  },
+  cardSubtitle: {
+    fontSize: Typography.sm,
+    color: Colors.textSecondary,
+    marginBottom: Spacing.lg,
+    fontWeight: Typography.medium,
+  },
+
+  // Banners
+  errorBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: Colors.emergencyBg,
+    borderWidth: 1,
+    borderColor: Colors.emergencyBorder,
+    borderRadius: Radius.md,
+    padding: Spacing.md,
+    marginBottom: Spacing.base,
+  },
+  errorText: { flex: 1, color: Colors.emergency, fontSize: Typography.sm, fontWeight: Typography.semibold },
+  successBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: Colors.guardianBg,
+    borderWidth: 1,
+    borderColor: Colors.guardianBorder,
+    borderRadius: Radius.md,
+    padding: Spacing.md,
+    marginBottom: Spacing.base,
+  },
+  successText: { flex: 1, color: Colors.guardian, fontSize: Typography.sm, fontWeight: Typography.semibold },
+
+  // Fields
   fieldGroup: { marginBottom: Spacing.md },
-  label: { fontSize: Typography.sm, fontWeight: Typography.semibold, color: Colors.textSecondary, marginBottom: 6, letterSpacing: 0.3 },
-  inputRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: Colors.bg, borderWidth: 1, borderColor: Colors.border, borderRadius: Radius.md, paddingHorizontal: Spacing.md },
+  label: { fontSize: Typography.sm, fontWeight: Typography.bold, color: Colors.textSecondary, marginBottom: 7 },
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.bg,
+    borderWidth: 1.5,
+    borderColor: Colors.borderLight,
+    borderRadius: Radius.md,
+    paddingHorizontal: Spacing.md,
+  },
   inputIcon: { marginRight: 8 },
-  input: { flex: 1, height: 50, color: Colors.textPrimary, fontSize: Typography.base },
+  input: { flex: 1, height: 50, color: Colors.textPrimary, fontSize: Typography.base, fontWeight: Typography.semibold },
   inputFlex: { flex: 1 },
   eyeBtn: { padding: 8 },
+
   forgotLink: { alignSelf: 'flex-end', marginBottom: Spacing.lg, marginTop: 2 },
-  forgotText: { color: Colors.gold, fontSize: Typography.sm, fontWeight: Typography.medium },
-  submitBtn: { backgroundColor: Colors.berry, borderRadius: Radius.xxl, height: 52, alignItems: 'center', justifyContent: 'center', marginTop: Spacing.sm, ...Shadows.berry },
+  forgotText: { color: Colors.berry, fontSize: Typography.sm, fontWeight: Typography.bold },
+
+  submitBtn: {
+    backgroundColor: Colors.berry,
+    borderRadius: Radius.full,
+    height: 52,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: Spacing.sm,
+    ...Shadows.berry,
+  },
   submitBtnDisabled: { opacity: 0.6 },
-  submitText: { color: '#fff', fontSize: Typography.md, fontWeight: Typography.bold, letterSpacing: 0.3 },
-  footer: { textAlign: 'center', color: 'rgba(255,255,255,0.45)', fontSize: Typography.xs, marginTop: Spacing.xl, paddingHorizontal: Spacing.md },
+  submitText: { color: '#fff', fontSize: Typography.md, fontWeight: Typography.extrabold, letterSpacing: 0.3 },
+
+  footer: {
+    textAlign: 'center',
+    color: Colors.textMuted,
+    fontSize: Typography.xs,
+    marginTop: Spacing.xl,
+    paddingHorizontal: Spacing.md,
+  },
 });
