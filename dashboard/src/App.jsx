@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   collection,
   query,
-  orderBy,
   onSnapshot,
   where,
 } from 'firebase/firestore';
@@ -81,20 +80,44 @@ function Dashboard({ user, logout }) {
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [loggingOut, setLoggingOut] = useState(false);
   const [activeCardPulse, setActiveCardPulse] = useState(false);
+  const [firestoreError, setFirestoreError] = useState(null);
   const prevActiveRef = useRef(0);
 
   useEffect(() => {
-    const q = query(collection(db, 'alerts'), orderBy('created_at', 'desc'));
-    return onSnapshot(q, (snapshot) => {
-      setAlerts(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
-    });
+    // Use a simple collection snapshot without orderBy to avoid requiring a
+    // Firestore composite index that may not exist. We sort on the client instead.
+    const q = query(collection(db, 'alerts'));
+    return onSnapshot(
+      q,
+      (snapshot) => {
+        setFirestoreError(null);
+        const docs = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        // Sort newest-first on the client; handle both Timestamp and string values
+        docs.sort((a, b) => {
+          const ta = a.created_at?.toMillis?.() ?? new Date(a.created_at ?? 0).getTime();
+          const tb = b.created_at?.toMillis?.() ?? new Date(b.created_at ?? 0).getTime();
+          return tb - ta;
+        });
+        setAlerts(docs);
+      },
+      (err) => {
+        console.error('Alerts snapshot error:', err);
+        setFirestoreError('Firestore read error: ' + err.message + '. Check security rules.');
+      },
+    );
   }, []);
 
   useEffect(() => {
     const q = query(collection(db, 'guardian_sessions'), where('status', '==', 'active'));
-    return onSnapshot(q, (snapshot) => {
-      setGuardianSessions(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
-    });
+    return onSnapshot(
+      q,
+      (snapshot) => {
+        setGuardianSessions(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+      },
+      (err) => {
+        console.error('Guardian sessions snapshot error:', err);
+      },
+    );
   }, []);
 
   const activeAlerts    = alerts.filter((a) => a.status === 'active').length;
@@ -162,6 +185,13 @@ function Dashboard({ user, logout }) {
           </div>
         </div>
       </div>
+
+      {/* ─── FIRESTORE ERROR BANNER ─── */}
+      {firestoreError && (
+        <div className="firestore-error-banner">
+          ⚠️ <strong>Dashboard Connection Error:</strong> {firestoreError}
+        </div>
+      )}
 
       {/* ─── STATS GRID ─── */}
       <div className="stats-grid">

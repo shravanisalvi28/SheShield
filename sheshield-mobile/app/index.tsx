@@ -3,6 +3,7 @@ import {
   StyleSheet, Text, View, TouchableOpacity, Alert,
   SafeAreaView, StatusBar, ActivityIndicator, Pressable,
 } from 'react-native';
+
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -24,7 +25,7 @@ import { signOut } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 import { Colors, Spacing, Radius, Typography, Shadows } from '../constants/theme';
 
-const API_URL = 'http://10.183.148.19:5000';
+import { API_URL } from '../constants/config';
 
 // Brand palette (matches task spec)
 const BRAND = {
@@ -250,18 +251,48 @@ export default function Index() {
       Alert.alert('Permission needed', 'Location access is required for Guardian Mode.');
       return;
     }
-    const { coords } = await Location.getCurrentPositionAsync({});
-    const res = await fetch(API_URL + '/api/guardian/start', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId, guardianId: 'lHbTxTwDJ4UOzTj3haXm', durationMinutes: 45, latitude: coords.latitude, longitude: coords.longitude }),
-    });
-    const data = await res.json();
-    if (data.success) {
-      setGuardianSessionId(data.sessionId);
-      Alert.alert('🛡️ Guardian Mode Active', 'Sharing your location with ' + data.guardianName);
-    } else {
-      Alert.alert('Error', data.error || 'Failed to start Guardian Mode');
+
+    // ── Fetch contacts via backend API (admin SDK bypasses Firestore security rules) ──
+    let guardianId: string | null = null;
+    try {
+      const contactsRes = await fetch(API_URL + '/api/contacts/' + userId);
+      if (!contactsRes.ok) throw new Error('Server returned ' + contactsRes.status);
+      const contacts = await contactsRes.json();
+      if (!Array.isArray(contacts) || contacts.length === 0) {
+        Alert.alert(
+          'No Guardian Contact',
+          'Please add an emergency contact first.\n\nTap the 👥 icon in the top-right to add one.',
+        );
+        return;
+      }
+      guardianId = contacts[0].id;
+    } catch (err: any) {
+      Alert.alert('Network Error', 'Could not fetch contacts: ' + err.message);
+      return;
+    }
+
+    try {
+      const { coords } = await Location.getCurrentPositionAsync({});
+      const res = await fetch(API_URL + '/api/guardian/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          guardianId,
+          durationMinutes: 45,
+          latitude: coords.latitude,
+          longitude: coords.longitude,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setGuardianSessionId(data.sessionId);
+        Alert.alert('🛡️ Guardian Mode Active', 'Sharing your location with ' + data.guardianName);
+      } else {
+        Alert.alert('Guardian Mode Error', data.error || 'Failed to start Guardian Mode');
+      }
+    } catch (err: any) {
+      Alert.alert('Network Error', 'Could not reach the server. Check your connection.');
     }
   }
 
@@ -315,6 +346,14 @@ export default function Index() {
         <View style={styles.headerRight}>
           <TouchableOpacity
             style={styles.headerIconBtn}
+            onPress={() => router.push('/contacts')}
+            activeOpacity={0.7}
+            accessibilityLabel='Emergency contacts'
+          >
+            <Ionicons name='people-outline' size={18} color={Colors.textSecondary} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.headerIconBtn}
             onPress={() => router.push('/fake-call')}
             activeOpacity={0.7}
             accessibilityLabel='Fake call'
@@ -335,6 +374,7 @@ export default function Index() {
           </TouchableOpacity>
         </View>
       </View>
+
 
       {/* Greeting strip */}
       {userEmail ? (

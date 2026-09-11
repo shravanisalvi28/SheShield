@@ -12,108 +12,78 @@ const router = express.Router();
 
 router.post('/trigger', async (req, res) => {
   try {
-    const {
-      user_id,
-      trigger_type,
-      latitude,
-      longitude
-    } = req.body;
+    const { user_id, trigger_type, latitude, longitude } = req.body;
 
-    if (
-      !user_id ||
-      !trigger_type ||
-      latitude == null ||
-      longitude == null
-    ) {
-      return res.status(400).json({
-        error: 'Missing required fields'
-      });
+    console.log('[Alert/trigger] Incoming:', { user_id, trigger_type, latitude, longitude });
+
+    if (!user_id || !trigger_type || latitude == null || longitude == null) {
+      return res.status(400).json({ error: 'Missing required fields' });
     }
 
     // --------------------------------------------------------
-    // 1. Find nearest police station and hospital
+    // 1. Save the alert to Firestore IMMEDIATELY
+    //    (Don't wait for Maps API — it must never block SOS)
     // --------------------------------------------------------
-
-    const [police, hospital] = await Promise.all([
-      findNearest(latitude, longitude, 'police'),
-      findNearest(latitude, longitude, 'hospital')
-    ]);
-
-    // --------------------------------------------------------
-    // 2. Create emergency alert
-    // --------------------------------------------------------
+    const now = new Date().toISOString();
 
     const alertRef = await db.collection('alerts').add({
-
       user_id,
       trigger_type,
-
       latitude: Number(latitude),
       longitude: Number(longitude),
-
-      nearest_police: police,
-      nearest_hospital: hospital,
-
+      nearest_police: null,
+      nearest_hospital: null,
       status: 'active',
-
-      // Location history starts with initial SOS position
       location_history: [
-        {
-          latitude: Number(latitude),
-          longitude: Number(longitude),
-          timestamp: new Date().toISOString()
-        }
+        { latitude: Number(latitude), longitude: Number(longitude), timestamp: now }
       ],
-
       created_at: FieldValue.serverTimestamp(),
-
-      last_location_update: new Date().toISOString()
+      last_location_update: now,
     });
 
-    const alertSnap = await alertRef.get();
-    const alert = {
-      id: alertRef.id,
-      ...alertSnap.data()
-    };
+    console.log('[Alert/trigger] Saved to Firestore:', alertRef.id);
 
     // --------------------------------------------------------
-    // 3. Notify emergency contacts
+    // 2. Respond immediately so the mobile gets the alertId
     // --------------------------------------------------------
-
-    const contactsSnap = await db
-      .collection('contacts')
-      .where('user_id', '==', user_id)
-      .get();
-
-    const contacts = contactsSnap.docs.map((d) => ({
-      id: d.id,
-      ...d.data()
-    }));
-
-    contacts.forEach((c) => {
-
-      console.log(
-        `[ALERT] Notifying ${c.name} (${c.phone}) — alert ${alert.id}`
-      );
-    });
-
-    // --------------------------------------------------------
-    // 4. Response
-    // --------------------------------------------------------
-
     res.status(201).json({
-      alert,
       alertId: alertRef.id,
-      notified: contacts.length,
-      message: 'Emergency alert created successfully'
+      notified: 0,
+      message: 'Emergency alert created successfully',
     });
+
+    // --------------------------------------------------------
+    // 3. Enrich with Maps data in the background (non-blocking)
+    // --------------------------------------------------------
+    Promise.all([
+      findNearest(latitude, longitude, 'police'),
+      findNearest(latitude, longitude, 'hospital'),
+    ]).then(async ([police, hospital]) => {
+      try {
+        await alertRef.update({ nearest_police: police, nearest_hospital: hospital });
+        console.log('[Alert/trigger] Updated with Maps data for alert:', alertRef.id);
+      } catch (e) {
+        console.error('[Alert/trigger] Failed to update Maps data:', e.message);
+      }
+    }).catch((e) => {
+      console.error('[Alert/trigger] Maps lookup error:', e.message);
+    });
+
+    // --------------------------------------------------------
+    // 4. Log emergency contacts (fire-and-forget)
+    // --------------------------------------------------------
+    db.collection('contacts').where('user_id', '==', user_id).get()
+      .then((snap) => {
+        snap.docs.forEach((d) => {
+          const c = d.data();
+          console.log(`[ALERT] Notifying ${c.name} (${c.phone}) — alert ${alertRef.id}`);
+        });
+      })
+      .catch(() => {});
 
   } catch (err) {
-
-    console.error(err);
-    res.status(500).json({
-      error: 'Failed to trigger alert'
-    });
+    console.error('[Alert/trigger] ERROR:', err);
+    res.status(500).json({ error: 'Failed to trigger alert: ' + err.message });
   }
 });
 
